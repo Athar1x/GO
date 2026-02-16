@@ -19,6 +19,13 @@ const ADMIN_PIN = "2024";
 const WA_PHONE = "201202687082";
 const SHIPPING_COST = 50;
 
+let socialLinks = JSON.parse(localStorage.getItem('athar_social_links')) || {
+    whatsapp: "",
+    facebook: "",
+    instagram: "",
+    tiktok: ""
+};
+
 const governorates = [
     "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "الشرقية", "المنوفية", 
     "القليوبية", "البحيرة", "الغربية", "بور سعيد", "دمياط", "الإسماعيلية", 
@@ -72,6 +79,7 @@ window.router = function(route, param = null) {
     const header = document.getElementById('main-header');
     const footer = document.getElementById('main-footer');
     const divider = document.getElementById('footer-divider');
+    const ramadanHero = document.getElementById('ramadan-hero');
     
     Object.values(slideIntervals).forEach(clearInterval);
     slideIntervals = {};
@@ -81,28 +89,39 @@ window.router = function(route, param = null) {
     if(route === 'home') {
         history.pushState(null, null, ' ');
         header.style.display = 'flex';
+        if(ramadanHero) ramadanHero.style.display = 'flex';
         renderHome(); 
     } else if (route === 'product') {
         header.style.display = 'none'; 
         footer.classList.add('hidden');
         divider.classList.add('hidden');
+        if(ramadanHero) ramadanHero.style.display = 'none';
         renderProductPage(param);
     } else if (route === 'cart') {
         history.pushState(null, null, '#cart');
         header.style.display = 'flex';
         footer.classList.add('hidden');
         divider.classList.add('hidden');
+        if(ramadanHero) ramadanHero.style.display = 'none';
         renderCartPage();
     } else if (route === 'admin-login') {
         header.style.display = 'none';
         footer.classList.add('hidden');
         divider.classList.add('hidden');
+        if(ramadanHero) ramadanHero.style.display = 'none';
         renderAdminLogin();
     } else if (route === 'admin-add') {
         header.style.display = 'none';
         footer.classList.add('hidden');
         divider.classList.add('hidden');
+        if(ramadanHero) ramadanHero.style.display = 'none';
         renderAddProductPage(param); 
+    } else if (route === 'social-settings') {
+        header.style.display = 'none';
+        footer.classList.add('hidden');
+        divider.classList.add('hidden');
+        if(ramadanHero) ramadanHero.style.display = 'none';
+        renderSocialSettings();
     }
 }
 
@@ -116,6 +135,62 @@ function updateFooter() {
     const divider = document.getElementById('footer-divider');
     if(footer) footer.classList.remove('hidden');
     if(divider) divider.classList.remove('hidden');
+    
+    const socialContainer = document.getElementById('social-icons-container');
+    if(socialContainer) {
+        let socialHTML = '';
+        
+        if(socialLinks.whatsapp) {
+            const waLink = socialLinks.whatsapp.startsWith('http') ? socialLinks.whatsapp : `https://wa.me/${socialLinks.whatsapp}`;
+            socialHTML += `
+                <a href="${waLink}" target="_blank" class="social-btn-premium wa">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </a>
+            `;
+        }
+        
+        if(socialLinks.facebook) {
+            socialHTML += `
+                <a href="${socialLinks.facebook}" target="_blank" class="social-btn-premium fb">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Facebook</span>
+                </a>
+            `;
+        }
+        
+        if(socialLinks.instagram) {
+            socialHTML += `
+                <a href="${socialLinks.instagram}" target="_blank" class="social-btn-premium ig">
+                    <i class="fab fa-instagram"></i>
+                    <span>Instagram</span>
+                </a>
+            `;
+        }
+        
+        if(socialLinks.tiktok) {
+            socialHTML += `
+                <a href="${socialLinks.tiktok}" target="_blank" class="social-btn-premium tk">
+                    <i class="fab fa-tiktok"></i>
+                    <span>TikTok</span>
+                </a>
+            `;
+        }
+        
+        if(!socialHTML && isAdmin) {
+            socialHTML = `
+                <div style="grid-column: 1/-1; text-align:center; color:var(--text-secondary); padding:20px;">
+                    <i class="fas fa-info-circle" style="font-size:2rem; color:var(--gold); margin-bottom:10px;"></i>
+                    <p>لم يتم إضافة روابط تواصل اجتماعي بعد</p>
+                    <button onclick="router('social-settings')" class="btn-sec" style="margin-top:10px;">
+                        إضافة الروابط
+                    </button>
+                </div>
+            `;
+        }
+        
+        socialContainer.innerHTML = socialHTML;
+    }
 }
 
 async function renderHome() {
@@ -246,7 +321,6 @@ window.renderProductPage = (id) => {
             <div class="product-detail-container">
                 <div class="gallery-section">
                     <div class="main-image-frame">
-                        <!-- زر مشاركة عائم فوق الصورة -->
                         <button class="floating-share-btn" onclick="shareProduct('${p.id}', '${p.title}')">
                             <i class="fas fa-share-alt"></i>
                         </button>
@@ -405,7 +479,6 @@ window.renderCartPage = () => {
         </div>
     `;
 }
-// باقي الدوال (Add, Admin, etc.) كما هي في الكود السابق
 window.updateCartItemQty = (i, change) => { let newQty = cart[i].qty + change; if(newQty >= 1) { cart[i].qty = newQty; localStorage.setItem('athar_cart', JSON.stringify(cart)); renderCartPage(); updateBadge(); } }
 window.sendWA = (total) => {
     const name = document.getElementById('c-name').value;
@@ -420,7 +493,18 @@ window.sendWA = (total) => {
     window.location.href = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(msg)}`;
     localStorage.removeItem('athar_cart'); cart = []; updateBadge(); router('home');
 }
-window.checkAdminAccess = () => { if(isAdmin) router('admin-add'); else router('admin-login'); }
+window.checkAdminAccess = () => { 
+    if(isAdmin) {
+        const choice = confirm("اضغط OK لإضافة منتج\nاضغط Cancel لتعديل روابط التواصل");
+        if(choice) {
+            router('admin-add');
+        } else {
+            router('social-settings');
+        }
+    } else {
+        router('admin-login');
+    }
+}
 window.renderAdminLogin = () => {
     document.body.style.background = 'var(--bg-grad)';
     document.getElementById('app').innerHTML = `<div class="login-wrapper"><div class="login-card glass-card"><i class="fas fa-user-shield fa-3x" style="color:var(--primary); margin-bottom:15px;"></i><h3 style="margin-bottom:20px;">لوحة المدير</h3><input type="password" id="admin-pin" class="form-input" style="text-align:center; margin-bottom:20px;" placeholder="الرمز السري"><button class="btn-primary" onclick="verifyPin()">دخول</button><button class="btn-back-circle" style="margin:20px auto 0;" onclick="router('home')"><i class="fas fa-arrow-right"></i></button></div></div>`;
@@ -452,5 +536,86 @@ window.editColorCart = (i) => { const item = cart[i]; const p = productsCache.fi
 window.confirmColorUpdate = () => { localStorage.setItem('athar_cart', JSON.stringify(cart)); closeColorModal(); renderCartPage(); }
 window.closeColorModal = () => document.getElementById('color-modal').classList.add('hidden');
 function updateBadge() { document.getElementById('cart-badge').innerText = cart.reduce((a,b)=>a+b.qty,0); }
+
+window.renderSocialSettings = () => {
+    const appDiv = document.getElementById('app');
+    document.body.style.background = 'var(--bg-grad)';
+    
+    appDiv.innerHTML = `
+        <div style="padding:20px; max-width:600px; margin:0 auto;">
+            <button class="btn-back-circle" onclick="router('home')">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            
+            <div class="glass-card" style="margin-top:20px;">
+                <h3 style="margin-bottom:25px; color:var(--primary); display:flex; align-items:center; gap:10px; font-size:1.6rem;">
+                    <i class="fas fa-share-alt" style="color:var(--gold);"></i>
+                    إعدادات التواصل الاجتماعي
+                </h3>
+                
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:600; color:var(--primary);">
+                        <i class="fab fa-whatsapp" style="color:#25D366; font-size:1.2rem;"></i>
+                        رقم الواتساب
+                    </label>
+                    <input id="social-wa" type="text" class="form-input" 
+                           placeholder="مثال: 201234567890" 
+                           value="${socialLinks.whatsapp}">
+                    <small style="color:var(--text-secondary); margin-top:5px; display:block;">
+                        أدخل الرقم بدون + أو مسافات (مثال: 201234567890)
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:600; color:var(--primary);">
+                        <i class="fab fa-facebook-f" style="color:#1877F2; font-size:1.2rem;"></i>
+                        رابط فيسبوك
+                    </label>
+                    <input id="social-fb" type="text" class="form-input" 
+                           placeholder="https://facebook.com/yourpage" 
+                           value="${socialLinks.facebook}">
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:600; color:var(--primary);">
+                        <i class="fab fa-instagram" style="color:#E4405F; font-size:1.2rem;"></i>
+                        رابط إنستجرام
+                    </label>
+                    <input id="social-ig" type="text" class="form-input" 
+                           placeholder="https://instagram.com/yourpage" 
+                           value="${socialLinks.instagram}">
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:600; color:var(--primary);">
+                        <i class="fab fa-tiktok" style="color:#000000; font-size:1.2rem;"></i>
+                        رابط تيك توك
+                    </label>
+                    <input id="social-tk" type="text" class="form-input" 
+                           placeholder="https://tiktok.com/@yourpage" 
+                           value="${socialLinks.tiktok}">
+                </div>
+
+                <button class="btn-primary" onclick="saveSocialLinks()" style="margin-top:10px;">
+                    <i class="fas fa-save"></i> حفظ التغييرات
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+window.saveSocialLinks = () => {
+    socialLinks.whatsapp = document.getElementById('social-wa').value.trim();
+    socialLinks.facebook = document.getElementById('social-fb').value.trim();
+    socialLinks.instagram = document.getElementById('social-ig').value.trim();
+    socialLinks.tiktok = document.getElementById('social-tk').value.trim();
+    
+    localStorage.setItem('athar_social_links', JSON.stringify(socialLinks));
+    showToast('تم حفظ الروابط بنجاح! ✓');
+    
+    setTimeout(() => {
+        router('home');
+    }, 1500);
+}
 
 updateBadge(); updateAdminUI();
