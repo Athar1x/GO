@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Athar Store | أثر</title>
+    
+    <link rel="icon" href="https://i.postimg.cc/BbZMFbN2/Gemini-Generated-Image-sike87sike87sike.png" type="image/png">
+    
+    <!-- Open Graph for Link Preview (صورة المشاركة) -->
+    <meta property="og:title" content="Athar Store | أثر">
+    <meta property="og:description" content="متجر أثر للمنتجات الإسلامية والهدايا الرمضانية المميزة.">
+    <meta property="og:image" content="https://i.postimg.cc/BbZMFbN2/Gemini-Generated-Image-sike87sike87sike.png">
+    <meta property="og:url" content="https://story-97cf7.firebaseapp.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- عنصر ديني علوي (البسملة) -->
+    <div class="top-basmala">بسم الله الرحمن الرحيم</div>
+
+    <!-- Header -->
+    <header class="glass-header" id="main-header">
+        <div class="header-content">
+            <div class="brand" onclick="router('home')">
+                <div class="logo-text">Athar</div>
+                <img src="https://i.postimg.cc/BbZMFbN2/Gemini-Generated-Image-sike87sike87sike.png" class="logo-img-small">
+            </div>
+            
+            <div class="nav-icons">
+                <div class="icon-btn hidden" id="admin-add-btn" onclick="router('admin-add')">
+                    <i class="fas fa-plus"></i>
+                </div>
+
+                <div class="icon-btn" onclick="router('cart')">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-badge" class="badge">0</span>
+                </div>
+
+                <div class="icon-btn" onclick="checkAdminAccess()">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app" class="main-content"></main>
+
+    <!-- فاصل ديني -->
+    <div class="islamic-divider hidden" id="footer-divider"></div>
+
+    <!-- Footer -->
+    <footer id="main-footer" class="footer hidden">
+        <div class="footer-links">
+            <a href="#">سياسة الخصوصية</a>
+            <a href="#">تواصل معنا</a>
+            <a href="#">الشروط والأحكام</a>
+        </div>
+        <div class="social-icons">
+            <a href="#" class="social-btn wa"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" class="social-btn fb"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-btn ig"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-btn tk"><i class="fab fa-tiktok"></i></a>
+        </div>
+        <div class="copyright">© 2026 Athar Store. جميع الحقوق محفوظة.</div>
+    </footer>
+
+    <div id="toast" class="toast hidden">
+        <span id="toast-msg">تمت العملية بنجاح</span>
+    </div>
+
+    <div id="color-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <h3>تغيير اللون</h3>
+            <div id="modal-colors-area" class="colors-grid"></div>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="confirmColorUpdate()">تأكيد</button>
+                <button class="btn-sec" onclick="closeColorModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
